@@ -3,6 +3,7 @@ import re
 import sys
 import cv2
 import time
+from scipy.stats import kendalltau, spearmanr
 import numpy as np
 import subprocess
 import multiprocessing
@@ -39,6 +40,8 @@ def process_image(args):
     return outputs
 
 
+
+
 def main():
     img_num = 25
     distortion_types = 24
@@ -68,45 +71,59 @@ def main():
         img_process.NSS,
         img_process.PSNRc
     ]
+    outputs = np.random.rand(img_num * distortion_types * distortion_levels, len(files))
 
     # Set up multiprocessing pool with a controlled number of processes
     max_processes = 13
-    with multiprocessing.Pool(processes=max_processes) as pool:
-        args = [(i, distortion_types, distortion_levels, reference_dir, distorted_dir, func_handler, files) for i in range(1, img_num + 1)]
-        # Collect results from each process
-        all_outputs = pool.map(process_image, args)
-        # Aggregate results into one large array
-        outputs = np.vstack(all_outputs)
+    # with multiprocessing.Pool(processes=max_processes) as pool:
+    #     args = [
+    #         (
+    #             i, distortion_types,
+    #             distortion_levels,
+    #             reference_dir,
+    #             distorted_dir,
+    #             func_handler,
+    #             files
+    #         ) for i in range(1, img_num + 1)
+    #     ]
+    #     # Collect results from each process
+    #     all_outputs = pool.map(process_image, args)
+    #     # Aggregate results into one large array
+    #     outputs = np.vstack(all_outputs)
 
     metrics_exe_dir = os.path.join(data_dir, "metrics_values")
-    mos_file = os.path.join(metrics_exe_dir, 'mos.txt')
+    mos_file_path = os.path.join(metrics_exe_dir, 'mos.txt')
+    with open(mos_file_path, 'r', encoding='utf-8') as f:
+        mos = f.read()
     for i, filename in enumerate(files):
-        file_path = os.path.join(data_dir, filename)
+        file_path = os.path.join(current_dir, 'data', 'results', filename)
         np.savetxt(file_path, outputs[:, i], fmt='%.4f')
-        kendall_output = subprocess.run(
-            [
-                os.path.join(
-                    metrics_exe_dir,
-                    'kendall.exe'
-                ),
-                mos_file,
-                file_path
-            ],
-            capture_output=True,
-            text=True
-        ).stdout
-        spearman_output = subprocess.run(
-            [
-                os.path.join(
-                    metrics_exe_dir,
-                    'spearman.exe'
-                ),
-                mos_file,
-                file_path
-            ],
-            capture_output=True,
-            text=True
-        ).stdout
+        kendall_output = kendalltau(mos, outputs[:, i])
+        spearman_output = spearmanr(mos, outputs[:, i])
+        # kendall_output = subprocess.run(
+        #     [
+        #         os.path.join(
+        #             metrics_exe_dir,
+        #             'kendall.exe'
+        #         ),
+        #         mos_file,
+        #         file_path
+        #     ],
+        #     capture_output=True,
+        #     text=True
+        # ).stdout
+        # spearman_output = subprocess.run(
+        #     [
+        #         os.path.join(
+        #             metrics_exe_dir,
+        #             'spearman.exe'
+        #         ),
+        #         mos_file,
+        #         file_path
+        #     ],
+        #     capture_output=True,
+        #     text=True
+        # ).stdout
         print(f'The Kendall correlation of {filename[:-4]} algorithm is: \n{kendall_output}')
         print(f'The Spearman correlation of {filename[:-4]} algorithm is: \n{spearman_output}')
 
