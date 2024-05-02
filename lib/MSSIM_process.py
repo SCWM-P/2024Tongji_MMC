@@ -26,7 +26,7 @@ def MSSIM_visual(img1, img2, file_path=None):
         os.makedirs(os.path.join(file_path, 'MSSIM'), exist_ok=True)
         file_path = os.path.join(file_path, 'MSSIM')
         for title, fig in files.items():
-            fig.savefig(os.path.join(file_path, f'MSSIM_{title}.png'))
+            fig.savefig(os.path.join(file_path, f'MSSIM_{title}.png'), transparent=True)
         print(f"MMSIM processing done! Files are saved in {file_path}")
 
     return files

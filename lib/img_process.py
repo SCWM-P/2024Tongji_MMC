@@ -55,8 +55,8 @@ def MSSIM(image_distorted, image_reference, K=None, window=None, L=255):
     if window is None:
         window = cv2.getGaussianKernel(11, 1.5) * cv2.getGaussianKernel(11, 1.5).T
     # 计算 SSIM
-    C1 = (K[0] ** 2) * L
-    C2 = (K[1] ** 2) * L
+    C1 = (K[0] * L) ** 2
+    C2 = (K[1] * L) ** 2
     mean1 = cv2.filter2D(img1, -1, window, borderType=cv2.BORDER_REFLECT)
     mean2 = cv2.filter2D(img2, -1, window, borderType=cv2.BORDER_REFLECT)
     mean1_sq = mean1 ** 2

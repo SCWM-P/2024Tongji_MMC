@@ -14,6 +14,10 @@ def readFile(path):
         raise FileNotFoundError(f'File not found! Path is {path}')
 
 
+def to_abs(correlation: np.ndarray):
+    return correlation if correlation.mean() > 0 else -correlation
+
+
 file_list = [
     'MSSIM', 'PSNR', 'PSNRc',
     'PSNRHA', 'PSNRHMA', 'PSNRHVS',
@@ -79,8 +83,30 @@ kendall = {
     ])
     for txt in file_list
 }
+spearman_p = {
+    txt: np.array([
+        spearmanr(
+            mos[:, i, :].flatten(),
+            results[txt][:, i, :].flatten()
+        )[1]
+        for i in range(distortion_types)
+    ])
+    for txt in file_list
+}
+kendall_p = {
+    txt: np.array([
+        kendalltau(
+            mos[:, i, :].flatten(),
+            results[txt][:, i, :].flatten()
+        )[1]
+        for i in range(distortion_types)
+    ])
+    for txt in file_list
+}
 spearman_df = pd.DataFrame(spearman)
 kendall_df = pd.DataFrame(kendall)
+spearman_p_df = pd.DataFrame(spearman_p)
+kendall_p_df = pd.DataFrame(kendall_p)
 
 standard_spearman = {
     txt: np.array([
@@ -102,10 +128,38 @@ standard_kendall = {
     ])
     for txt in standard_file_list
 }
+standard_spearman_p = {
+    txt: np.array([
+        spearmanr(
+            mos[:, i, :].flatten(),
+            standard_results[txt][:, i, :].flatten()
+        )[1]
+        for i in range(distortion_types)
+    ])
+    for txt in standard_file_list
+}
+standard_kendall_p = {
+    txt: np.array([
+        kendalltau(
+            mos[:, i, :].flatten(),
+            standard_results[txt][:, i, :].flatten()
+        )[1]
+        for i in range(distortion_types)
+    ])
+    for txt in standard_file_list
+}
 standard_spearman_df = pd.DataFrame(standard_spearman)
 standard_kendall_df = pd.DataFrame(standard_kendall)
+standard_spearman_p_df = pd.DataFrame(standard_spearman_p)
+standard_kendall_p_df = pd.DataFrame(standard_kendall_p)
 
-spearman_df.to_excel(os.path.join(savePath, 'spearman.xlsx'))
-kendall_df.to_excel(os.path.join(savePath, 'kendall.xlsx'))
-standard_spearman_df.to_excel(os.path.join(savePath, 'standard_spearman.xlsx'))
-standard_kendall_df.to_excel(os.path.join(savePath, 'standard_kendall.xlsx'))
+with pd.ExcelWriter(os.path.join(savePath, 'results.xlsx'), mode='w') as writer:
+    spearman_df.to_excel(writer, sheet_name='spearman')
+    kendall_df.to_excel(writer, sheet_name='kendall')
+    spearman_p_df.to_excel(writer, sheet_name='spearman_p')
+    kendall_p_df.to_excel(writer, sheet_name='kendall_p')
+with pd.ExcelWriter(os.path.join(savePath, 'standard_results.xlsx'), mode='w') as writer:
+    standard_spearman_df.to_excel(writer, sheet_name='spearman')
+    standard_kendall_df.to_excel(writer, sheet_name='kendall')
+    standard_spearman_p_df.to_excel(writer, sheet_name='spearman_p')
+    standard_kendall_p_df.to_excel(writer, sheet_name='kendall_p')

@@ -28,6 +28,6 @@ def PSNR_visual(img1, img2, file_path=None):
         os.makedirs(os.path.join(file_path, 'PSNR'), exist_ok=True)
         file_path = os.path.join(file_path, 'PSNR')
         for title, fig in files.items():
-            fig.savefig(os.path.join(file_path, f'{title}.png'))
+            fig.savefig(os.path.join(file_path, f'{title}.png'), transparent=True)
         print(f"PSNR processing done! Files are saved in {file_path}")
     return files

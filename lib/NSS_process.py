@@ -41,7 +41,7 @@ def NSS_visual(img, file_path=None):
         os.makedirs(os.path.join(file_path, 'NSS'), exist_ok=True)
         file_path = os.path.join(file_path, 'NSS')
         for name, file in files.items():
-            file.savefig(os.path.join(file_path, f'NSS_{name}.png'))
+            file.savefig(os.path.join(file_path, f'NSS_{name}.png'), transparent=True)
         print(f"NSS processing done! Files are saved in {file_path}")
 
     return files
