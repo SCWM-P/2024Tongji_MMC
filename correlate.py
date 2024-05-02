@@ -153,6 +153,7 @@ standard_kendall_df = pd.DataFrame(standard_kendall)
 standard_spearman_p_df = pd.DataFrame(standard_spearman_p)
 standard_kendall_p_df = pd.DataFrame(standard_kendall_p)
 
+# 保存结果
 with pd.ExcelWriter(os.path.join(savePath, 'results.xlsx'), mode='w') as writer:
     spearman_df.to_excel(writer, sheet_name='spearman')
     kendall_df.to_excel(writer, sheet_name='kendall')
@@ -163,3 +164,5 @@ with pd.ExcelWriter(os.path.join(savePath, 'standard_results.xlsx'), mode='w') a
     standard_kendall_df.to_excel(writer, sheet_name='kendall')
     standard_spearman_p_df.to_excel(writer, sheet_name='spearman_p')
     standard_kendall_p_df.to_excel(writer, sheet_name='kendall_p')
+
+best_algorithm = spearman_df.idxmax(axis=1).to_dict()
